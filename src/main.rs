@@ -5,6 +5,7 @@ use egui_extras::{Size, TableBuilder};
 struct MyEguiApp {
     my_string: String,
     source_text: String,
+    file_path: Option<String>,
 }
 
 impl MyEguiApp {
@@ -22,32 +23,44 @@ impl eframe::App for MyEguiApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             let height = ui.available_height();
             ui.vertical(|ui| {
-                ui.horizontal(|ui| {                   
-                    ui.add(egui::TextEdit::singleline(&mut self.my_string));
-                   
-                    ui.add_space(ui.available_width()*0.85);
+                ui.horizontal(|ui| {
+                    if ui.button("Open file…").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().pick_file() {
+                            self.file_path = Some(path.display().to_string());
+                        }
+                    }
+
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.my_string)
+                            .desired_width(ui.available_width() * 0.85),
+                    );
+
+                    //ui.add_space(ui.available_width() * 0.85);
                     ui.label("--");
                     let search_button = ui.add(egui::Button::new("Search"));
                     if search_button.clicked() {
                         println!("{}", self.my_string);
-                    }                  
+                    }
                 });
-                
-                ui.add_sized([ui.available_width(),height*0.7], egui::TextEdit::multiline(&mut self.source_text));
-                   
+
+                ui.add_sized(
+                    [ui.available_width(), height * 0.7],
+                    egui::TextEdit::multiline(&mut self.source_text),
+                );
+
                 TableBuilder::new(ui)
                     .column(Size::remainder().at_least(100.0))
                     .column(Size::exact(40.0))
                     .header(20.0, |mut header| {
                         header.col(|ui| {
                             ui.heading("Growing");
-                        });                       
+                        });
                     })
                     .body(|mut body| {
                         body.row(30.0, |mut row| {
                             row.col(|ui| {
                                 ui.label("first row growing cell");
-                            });                            
+                            });
                         });
                     });
             });

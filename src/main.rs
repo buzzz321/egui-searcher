@@ -1,11 +1,29 @@
+use std::fs;
+
 use eframe::egui;
 use egui_extras::{Size, TableBuilder};
 
+#[derive(Debug)]
+struct Matches {
+    source_matches_col: usize,
+    source_matches_row: usize,
+}
+
+impl Matches {
+    fn new(source_matches_col: usize, source_matches_row: usize) -> Self {
+        Self {
+            source_matches_col,
+            source_matches_row,
+        }
+    }
+}
+
 #[derive(Default)]
 struct MyEguiApp {
-    my_string: String,
+    searchkey: String,
     source_text: String,
     file_path: Option<String>,
+    source_matches: Vec<Matches>,
 }
 
 impl MyEguiApp {
@@ -16,22 +34,34 @@ impl MyEguiApp {
         // for e.g. egui::PaintCallback.
         Self::default()
     }
+
+    fn finder(&mut self) {
+        let mut lineno: usize = 0;
+        for line in self.source_text.lines() {
+            if let Some(index) = line.find(&self.searchkey) {
+                self.source_matches.push(Matches::new(index, lineno));
+            }
+            lineno += 1;
+        }
+        println!("matches on lines {:?} ", self.source_matches);
+    }
 }
 
 impl eframe::App for MyEguiApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            let height = ui.available_height();
             ui.vertical(|ui| {
                 ui.horizontal(|ui| {
                     if ui.button("Open file…").clicked() {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             self.file_path = Some(path.display().to_string());
+                            self.source_text = fs::read_to_string(self.file_path.clone().unwrap())
+                                .expect("Should have been able to read the file");
                         }
                     }
 
                     ui.add(
-                        egui::TextEdit::singleline(&mut self.my_string)
+                        egui::TextEdit::singleline(&mut self.searchkey)
                             .desired_width(ui.available_width() * 0.85),
                     );
 
@@ -39,15 +69,22 @@ impl eframe::App for MyEguiApp {
                     ui.label("--");
                     let search_button = ui.add(egui::Button::new("Search"));
                     if search_button.clicked() {
-                        println!("{}", self.my_string);
+                        println!("{}", self.searchkey);
+                        self.finder();
                     }
                 });
-
-                ui.add_sized(
-                    [ui.available_width(), height * 0.7],
-                    egui::TextEdit::multiline(&mut self.source_text),
-                );
-
+                let height = ui.available_height();
+                ui.push_id(1, |ui| {
+                    egui::ScrollArea::vertical()
+                        .max_height(height * 0.7)
+                        .show(ui, |ui| {
+                            ui.add_sized(
+                                [ui.available_width(), height * 0.7],
+                                egui::TextEdit::multiline(&mut self.source_text)
+                                    .cursor_at_end(false),
+                            );
+                        });
+                });
                 TableBuilder::new(ui)
                     .column(Size::remainder().at_least(100.0))
                     .column(Size::exact(40.0))

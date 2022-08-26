@@ -1,4 +1,7 @@
-use std::fs;
+use std::{
+    fs,
+    io::{BufReader, Read},
+};
 
 use eframe::egui;
 use egui_extras::{Size, TableBuilder};
@@ -45,6 +48,21 @@ impl MyEguiApp {
         }
         println!("matches on lines {:?} ", self.source_matches);
     }
+
+    fn open_file(&mut self, filename: String) {
+        let path = fs::File::open(filename.clone());
+        match path {
+            Ok(infile) => {
+                let mut f = BufReader::new(infile);
+                let metadata = fs::metadata(filename.clone()).unwrap();
+                self.source_text.reserve(metadata.len() as usize);
+                if let Ok(_) = f.read_to_string(&mut self.source_text) {
+                    return;
+                }
+            }
+            Err(e) => println!("Cant open file due to: {}", e),
+        }
+    }
 }
 
 impl eframe::App for MyEguiApp {
@@ -55,8 +73,9 @@ impl eframe::App for MyEguiApp {
                     if ui.button("Open file…").clicked() {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             self.file_path = Some(path.display().to_string());
-                            self.source_text = fs::read_to_string(self.file_path.clone().unwrap())
-                                .expect("Should have been able to read the file");
+                            //self.source_text = fs::read_to_string(self.file_path.clone().unwrap())
+                            //    .expect("Should have been able to read the file");
+                            self.open_file(self.file_path.as_ref().unwrap().clone());
                         }
                     }
 

@@ -50,11 +50,11 @@ impl MyEguiApp {
     }
 
     fn open_file(&mut self, filename: String) {
-        let path = fs::File::open(filename.clone());
+        let path = fs::File::open(&filename);
         match path {
             Ok(infile) => {
                 let mut f = BufReader::new(infile);
-                let metadata = fs::metadata(filename.clone()).unwrap();
+                let metadata = fs::metadata(&filename).unwrap();
                 self.source_text.reserve(metadata.len() as usize);
                 if let Ok(_) = f.read_to_string(&mut self.source_text) {
                     return;
@@ -93,6 +93,9 @@ impl eframe::App for MyEguiApp {
                     }
                 });
                 let height = ui.available_height();
+                /*  let styles = egui::style::default_text_styles();
+                    let font = styles.get(&0).unwrap();
+                */
                 ui.push_id(1, |ui| {
                     egui::ScrollArea::vertical()
                         .max_height(height * 0.7)

@@ -27,6 +27,7 @@ struct MyEguiApp {
     source_text: String,
     file_path: Option<String>,
     source_matches: Vec<Matches>,
+    font_height: f32,
 }
 
 impl MyEguiApp {
@@ -93,13 +94,12 @@ impl eframe::App for MyEguiApp {
                     }
                 });
                 let height = ui.available_height();
-                /*  let styles = egui::style::default_text_styles();
-                    let font = styles.get(&0).unwrap();
-                */
+
                 ui.push_id(1, |ui| {
                     egui::ScrollArea::vertical()
                         .max_height(height * 0.7)
                         .show(ui, |ui| {
+                            self.font_height = ui.style().text_styles()[0].resolve(ui.style()).size;
                             ui.add_sized(
                                 [ui.available_width(), height * 0.7],
                                 egui::TextEdit::multiline(&mut self.source_text)

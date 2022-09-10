@@ -3,7 +3,7 @@ use std::{
     io::{BufReader, Read},
 };
 
-use eframe::egui;
+use eframe::{egui, epaint::Color32, epaint::FontId};
 use egui_extras::{Size, TableBuilder};
 
 #[derive(Debug)]
@@ -28,6 +28,7 @@ struct MyEguiApp {
     file_path: Option<String>,
     source_matches: Vec<Matches>,
     font_height: f32,
+    text_galley: Arc<Galley>,
 }
 
 impl MyEguiApp {
@@ -95,16 +96,33 @@ impl eframe::App for MyEguiApp {
                 });
                 let height = ui.available_height();
 
+                // # egui::__run_test_ui(|ui| {
+                // # let mut my_string = String::new();
+                // # use egui::{ Color32, FontId };
+
+                // # });
                 ui.push_id(1, |ui| {
                     egui::ScrollArea::vertical()
                         .max_height(height * 0.7)
                         .show(ui, |ui| {
                             self.font_height = ui.style().text_styles()[0].resolve(ui.style()).size;
-                            ui.add_sized(
+                            /*         ui.add_sized(
                                 [ui.available_width(), height * 0.7],
                                 egui::TextEdit::multiline(&mut self.source_text)
                                     .cursor_at_end(false),
+                            ); */
+                            let text_edit = egui::TextEdit::multiline(&mut self.source_text)
+                                .desired_width(f32::INFINITY)
+                                .desired_rows((height / self.font_height * 0.7) as usize);
+                            let output = text_edit.show(ui);
+                            let painter = ui.painter_at(output.response.rect);
+                            let galley = painter.layout(
+                                self.source_text.to_owned(),
+                                FontId::default(),
+                                Color32::from_rgba_premultiplied(100, 100, 100, 100),
+                                f32::INFINITY,
                             );
+                            painter.galley(output.text_draw_pos, galley);
                         });
                 });
                 TableBuilder::new(ui)

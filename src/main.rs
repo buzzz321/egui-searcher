@@ -8,15 +8,15 @@ use egui_extras::{Size, TableBuilder};
 
 #[derive(Debug)]
 struct Matches {
-    source_matches_col: usize,
-    source_matches_row: usize,
+    _col: usize,
+    row: usize,
 }
 
 impl Matches {
     fn new(source_matches_col: usize, source_matches_row: usize) -> Self {
         Self {
-            source_matches_col,
-            source_matches_row,
+            _col: source_matches_col,
+            row: source_matches_row,
         }
     }
 }
@@ -37,6 +37,35 @@ impl MyEguiApp {
         // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
         // for e.g. egui::PaintCallback.
         Self::default()
+    }
+
+    fn get_line(&self, lineno: usize) -> Option<String> {
+        let bytebuff = self.source_text.as_bytes();
+
+        if lineno > bytebuff.len() {
+            return None;
+        }
+
+        let mut curr_line_end: usize = 0;
+        let mut curr_line_start: usize;
+        let mut curr_line_no: usize = 0;
+        for (index,item) in bytebuff.iter().enumerate(){
+            if *item == b'\n'{
+                curr_line_start = curr_line_end;
+                curr_line_end = index;
+
+                if curr_line_no == lineno{
+                    return Some(
+                        std::str::from_utf8(&bytebuff[curr_line_start + 1..curr_line_end])
+                            .unwrap()
+                            .to_string(),
+                    );                    
+                }
+                
+                curr_line_no += 1;
+            }           
+        }
+        None
     }
 
     fn finder(&mut self) {
@@ -95,21 +124,6 @@ impl eframe::App for MyEguiApp {
                 });
                 let height = ui.available_height();
 
-                // # egui::__run_test_ui(|ui| {
-                // # let mut my_string = String::new();
-                // # use egui::{ Color32, FontId };
-                // let text_edit = egui::TextEdit::multiline(&mut my_string)
-                //     .desired_width(f32::INFINITY);
-                // let output = text_edit.show(ui);
-                // let painter = ui.painter_at(output.response.rect);
-                // let galley = painter.layout(
-                //     String::from("Enter text"),
-                //     FontId::default(),
-                //     Color32::from_rgba_premultiplied(100, 100, 100, 100),
-                //     f32::INFINITY
-                // );
-                // painter.galley(output.text_draw_pos, galley);
-                // # });
                 ui.push_id(1, |ui| {
                     egui::ScrollArea::vertical()
                         .max_height(height * 0.7)
@@ -127,13 +141,15 @@ impl eframe::App for MyEguiApp {
                     .column(Size::exact(40.0))
                     .header(20.0, |mut header| {
                         header.col(|ui| {
-                            ui.heading("Growing");
+                            ui.heading(self.searchkey.to_string());
                         });
                     })
-                    .body(|mut body| {
-                        body.row(30.0, |mut row| {
+                    .body(|body| {
+                        body.rows(15.0, self.source_matches.len(), |row_index, mut row| {
                             row.col(|ui| {
-                                ui.label("first row growing cell");
+                                ui.label(
+                                    self.get_line(self.source_matches[row_index].row).unwrap(),
+                                );
                             });
                         });
                     });

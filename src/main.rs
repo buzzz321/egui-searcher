@@ -4,6 +4,7 @@ use std::{
 };
 
 use eframe::egui;
+use egui::{Label, Sense};
 use egui_extras::{Size, TableBuilder};
 
 #[derive(Debug)]
@@ -49,21 +50,21 @@ impl MyEguiApp {
         let mut curr_line_end: usize = 0;
         let mut curr_line_start: usize;
         let mut curr_line_no: usize = 0;
-        for (index,item) in bytebuff.iter().enumerate(){
-            if *item == b'\n'{
+        for (index, item) in bytebuff.iter().enumerate() {
+            if *item == b'\n' {
                 curr_line_start = curr_line_end;
                 curr_line_end = index;
 
-                if curr_line_no == lineno{
+                if curr_line_no == lineno {
                     return Some(
                         std::str::from_utf8(&bytebuff[curr_line_start + 1..curr_line_end])
                             .unwrap()
                             .to_string(),
-                    );                    
+                    );
                 }
-                
+
                 curr_line_no += 1;
-            }           
+            }
         }
         None
     }
@@ -147,9 +148,16 @@ impl eframe::App for MyEguiApp {
                     .body(|body| {
                         body.rows(15.0, self.source_matches.len(), |row_index, mut row| {
                             row.col(|ui| {
-                                ui.label(
-                                    self.get_line(self.source_matches[row_index].row).unwrap(),
+                                let resp = ui.add(
+                                    Label::new(
+                                        self.get_line(self.source_matches[row_index].row).unwrap(),
+                                    )
+                                    .sense(Sense::click()),
                                 );
+
+                                if resp.clicked() {
+                                    println!("row {}", row_index);
+                                }
                             });
                         });
                     });

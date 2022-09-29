@@ -130,10 +130,11 @@ impl eframe::App for MyEguiApp {
                         .max_height(height * 0.7)
                         .show(ui, |ui| {
                             self.font_height = ui.style().text_styles()[0].resolve(ui.style()).size;
+                            let myedit = egui::TextEdit::multiline(&mut self.source_text)
+                                    .cursor_at_end(false);
                             ui.add_sized(
                                 [ui.available_width(), height * 0.7],
-                                egui::TextEdit::multiline(&mut self.source_text)
-                                    .cursor_at_end(false),
+                                myedit,
                             );
                         });
                 });
@@ -156,7 +157,7 @@ impl eframe::App for MyEguiApp {
                                 );
 
                                 if resp.clicked() {
-                                    println!("row {}", row_index);
+                                    println!("row {} text {}", row_index,self.get_line(self.source_matches[row_index].row).unwrap());
                                 }
                             });
                         });

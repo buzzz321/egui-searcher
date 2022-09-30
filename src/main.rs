@@ -124,19 +124,14 @@ impl eframe::App for MyEguiApp {
                     }
                 });
                 let height = ui.available_height();
-
+                let myedit = egui::TextEdit::multiline(&mut self.source_text).cursor_at_end(false);
+                let myscroll = egui::ScrollArea::vertical().max_height(height * 0.7);
                 ui.push_id(1, |ui| {
-                    egui::ScrollArea::vertical()
-                        .max_height(height * 0.7)
-                        .show(ui, |ui| {
-                            self.font_height = ui.style().text_styles()[0].resolve(ui.style()).size;
-                            let myedit = egui::TextEdit::multiline(&mut self.source_text)
-                                    .cursor_at_end(false);
-                            ui.add_sized(
-                                [ui.available_width(), height * 0.7],
-                                myedit,
-                            );
-                        });
+                    myscroll.show(ui, |ui| {
+                        self.font_height = ui.style().text_styles()[0].resolve(ui.style()).size;
+
+                        ui.add_sized([ui.available_width(), height * 0.7], myedit);
+                    });
                 });
                 TableBuilder::new(ui)
                     .column(Size::remainder().at_least(100.0))
@@ -157,7 +152,11 @@ impl eframe::App for MyEguiApp {
                                 );
 
                                 if resp.clicked() {
-                                    println!("row {} text {}", row_index,self.get_line(self.source_matches[row_index].row).unwrap());
+                                    println!(
+                                        "row {} text {}",
+                                        row_index,
+                                        self.get_line(self.source_matches[row_index].row).unwrap()
+                                    );
                                 }
                             });
                         });

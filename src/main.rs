@@ -5,7 +5,7 @@ use std::{
 
 use eframe::egui;
 use egui::{Label, Sense};
-use egui_extras::{Size, TableBuilder};
+use egui_extras::{Column, TableBuilder};
 
 #[derive(Debug)]
 struct Matches {
@@ -134,8 +134,8 @@ impl eframe::App for MyEguiApp {
                     });
                 });
                 TableBuilder::new(ui)
-                    .column(Size::remainder().at_least(100.0))
-                    .column(Size::exact(40.0))
+                    .column(Column::remainder().at_least(100.0))
+                    .column(Column::exact(40.0))
                     .header(20.0, |mut header| {
                         header.col(|ui| {
                             ui.heading(self.searchkey.to_string());
@@ -181,11 +181,11 @@ impl eframe::App for MyEguiApp {
         egui::Vec2::INFINITY
     }
 
-    fn clear_color(&self, _visuals: &egui::Visuals) -> egui::Rgba {
+    fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
         // NOTE: a bright gray makes the shadows of the windows look weird.
         // We use a bit of transparency so that if the user switches on the
         // `transparent()` option they get immediate results.
-        egui::Color32::from_rgba_unmultiplied(12, 12, 12, 180).into()
+        egui::Color32::from_rgba_unmultiplied(12, 12, 12, 180).to_normalized_gamma_f32()
 
         // _visuals.window_fill() would also be a natural choice
     }

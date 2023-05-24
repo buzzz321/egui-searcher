@@ -207,7 +207,7 @@ impl eframe::App for MyEguiApp {
 
 fn main() {
     let native_options = eframe::NativeOptions::default();
-    eframe::run_native(
+    _ = eframe::run_native(
         "Searcher",
         native_options,
         Box::new(|cc| Box::new(MyEguiApp::new(cc))),

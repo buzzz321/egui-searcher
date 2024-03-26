@@ -142,7 +142,9 @@ impl eframe::App for MyEguiApp {
                         });
                     })
                     .body(|body| {
-                        body.rows(15.0, self.source_matches.len(), |row_index, mut row| {
+
+                        body.rows(15.0, self.source_matches.len(), |mut row| {
+                            let row_index = row.index();
                             row.col(|ui| {
                                 let resp = ui.add(
                                     Label::new(
@@ -167,10 +169,6 @@ impl eframe::App for MyEguiApp {
 
     fn save(&mut self, _storage: &mut dyn eframe::Storage) {}
 
-    fn on_close_event(&mut self) -> bool {
-        true
-    }
-
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {}
 
     fn auto_save_interval(&self) -> std::time::Duration {
@@ -189,12 +187,6 @@ impl eframe::App for MyEguiApp {
     fn persist_egui_memory(&self) -> bool {
         true
     }
-
-    fn warm_up_enabled(&self) -> bool {
-        false
-    }
-
-    fn post_rendering(&mut self, _window_size_px: [u32; 2], _frame: &eframe::Frame) {}
 }
 
 fn main() {

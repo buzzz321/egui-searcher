@@ -194,6 +194,6 @@ fn main() {
     _ = eframe::run_native(
         "Searcher",
         native_options,
-        Box::new(|cc| Box::new(MyEguiApp::new(cc))),
+        Box::new(|cc| Ok(Box::new(MyEguiApp::new(cc)))),
     );
 }
